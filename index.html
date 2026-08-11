@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReviQ — Révise intelligemment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root{--bg:#0a0f0d;--bg2:#111a16;--card:#152019;--card-hover:#1a2b22;--border:#243d30;--fg:#e8f0eb;--fg-muted:#7a9b88;--accent:#00e676;--accent2:#ff6b35;--accent3:#00bcd4;--danger:#ff4757;--success:#00e676;--warning:#ffc107}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
+        h1,h2,h3,h4,h5{font-family:"Space Grotesk",sans-serif}
+        .bg-mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+        .bg-mesh .blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:.15;animation:bf 20s ease-in-out infinite}
+        .b1{width:600px;height:600px;background:var(--accent);top:-200px;left:-100px}
+        .b2{width:500px;height:500px;background:var(--accent2);bottom:-200px;right:-100px;animation-delay:-7s}
+        .b3{width:400px;height:400px;background:var(--accent3);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-14s}
+        @keyframes bf{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(80px,-60px) scale(1.1)}50%{transform:translate(-40px,80px) scale(.9)}75%{transform:translate(60px,40px) scale(1.05)}}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+        .nav-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,15,13,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+        .nl{position:relative;color:var(--fg-muted);transition:color .3s;padding:.5rem 0;cursor:pointer;font-weight:500}
+        .nl:hover,.nl.on{color:var(--accent)}.nl.on::after{content:"";position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--accent);border-radius:1px}
+        .pg{display:none;position:relative;z-index:1;padding-top:80px;min-height:100vh}.pg.on{display:block;animation:fi .4s ease}
+        @keyframes fi{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+        .cd{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:all .3s}
+        .cd:hover{background:var(--card-hover);border-color:var(--accent);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,230,118,.08)}
+        .cds{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem}
+        .bp{background:var(--accent);color:var(--bg);font-weight:600;padding:.75rem 1.75rem;border-radius:12px;border:none;cursor:pointer;font-size:.95rem;transition:all .3s;font-family:"Space Grotesk",sans-serif}
+        .bp:hover{background:#33eb91;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,230,118,.3)}
+        .bs{background:transparent;color:var(--accent);font-weight:600;padding:.75rem 1.75rem;border-radius:12px;border:2px solid var(--accent);cursor:pointer;font-size:.95rem;transition:all .3s;font-family:"Space Grotesk",sans-serif}
+        .bs:hover{background:rgba(0,230,118,.1);transform:translateY(-2px)}
+        .qo{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:1rem 1.25rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:1rem}
+        .qo:hover{border-color:var(--fg-muted);background:var(--card-hover)}
+        .qo.sel{border-color:var(--accent);background:rgba(0,230,118,.08)}
+        .qo.ok{border-color:var(--success);background:rgba(0,230,118,.12)}
+        .qo.no{border-color:var(--danger);background:rgba(255,71,87,.12)}
+        .qo .lt{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:"Space Grotesk",sans-serif;background:rgba(255,255,255,.05);flex-shrink:0;transition:all .25s}
+        .qo.sel .lt{background:var(--accent);color:var(--bg)}.qo.ok .lt{background:var(--success);color:var(--bg)}.qo.no .lt{background:var(--danger);color:#fff}
+        .pb{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+        .pf{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.22,1,.36,1);background:linear-gradient(90deg,var(--accent),var(--accent3))}
+        .tr{width:70px;height:70px;position:relative}.tr svg{transform:rotate(-90deg)}
+        .tr .tt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:1.1rem}
+        .tr.w .tt{color:var(--warning)}.tr.d .tt{color:var(--danger);animation:pu .5s ease infinite}
+        @keyframes pu{0%,100%{opacity:1}50%{opacity:.5}}
+        .sn{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:2.5rem;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .cb{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;border-radius:8px;font-size:.8rem;font-weight:600}
+        .tc{position:fixed;top:90px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px}
+        .ts{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem;min-width:280px;animation:sir .4s ease,for .4s ease 2.6s forwards;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+        @keyframes sir{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes for{to{transform:translateX(120%);opacity:0}}
+        .mo{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
+        .mo.sh{display:flex;animation:fi .3s ease}
+        .mb{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2rem;max-width:520px;width:100%;max-height:85vh;overflow-y:auto}
+        .fp{position:fixed;width:4px;height:4px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:0;opacity:.3}
+        .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem}
+        .sf{display:inline-block;animation:fl 1.5s ease-in-out infinite alternate}
+        @keyframes fl{0%{filter:brightness(1);transform:scale(1)}50%{filter:brightness(1.3);transform:scale(1.05)}100%{filter:brightness(.9);transform:scale(.98)}}
+        .kb{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;font-size:.7rem;font-family:"Space Grotesk",sans-serif;font-weight:600;color:var(--fg-muted)}
+        .cc{position:relative;width:100%;height:200px}
+        .lp{flex-shrink:0;padding:.6rem 1.25rem;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--fg-muted);font-weight:600;font-size:.85rem;cursor:pointer;transition:all .25s;font-family:"Space Grotesk",sans-serif;white-space:nowrap;user-select:none}
+        .lp:hover{border-color:var(--fg-muted);color:var(--fg)}
+        .lp.on{border-color:var(--accent);background:rgba(0,230,118,.1);color:var(--accent);box-shadow:0 0 20px rgba(0,230,118,.15)}
+        .lp .ls{display:block;font-size:.65rem;font-weight:400;opacity:.6;margin-top:2px}
+        .lt2{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 0;scrollbar-width:none}.lt2::-webkit-scrollbar{display:none}
+        .li{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:8px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.15);color:var(--accent);font-size:.8rem;font-weight:600;font-family:"Space Grotesk",sans-serif}
+        .sl{opacity:.45;pointer-events:none;filter:grayscale(.5)}
+        .sl .lo{position:absolute;inset:0;border-radius:16px;background:rgba(10,15,13,.5);display:flex;align-items:center;justify-content:center;z-index:2}
+        .cf{position:relative;z-index:1;border-top:1px solid var(--border);background:rgba(10,15,13,.9);backdrop-filter:blur(12px)}
+        .crb{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;border-radius:10px;background:linear-gradient(135deg,rgba(0,230,118,.1),rgba(0,188,212,.1));border:1px solid rgba(0,230,118,.2);font-weight:600;font-size:.85rem;color:var(--accent)}
+        .cav{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.7rem;color:var(--bg);font-family:"Space Grotesk",sans-serif}
+        .hc{position:absolute;bottom:-30px;right:0;opacity:.06;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:7rem;white-space:nowrap;pointer-events:none;color:var(--fg);line-height:1}
+        .pcb{background:linear-gradient(135deg,rgba(0,230,118,.08),rgba(0,188,212,.08));border:1px solid rgba(0,230,118,.15);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem}
+        .pci{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:var(--bg);font-family:"Space Grotesk",sans-serif;flex-shrink:0}
+        .vb{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:6px;background:rgba(0,230,118,.12);color:var(--accent);font-size:.7rem;font-weight:700}
+        .nlb{display:flex;align-items:center;gap:.4rem;padding:.35rem .75rem;border-radius:10px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .25s;font-size:.8rem;color:var(--fg-muted);font-weight:600;font-family:"Space Grotesk",sans-serif;white-space:nowrap}
+        .nlb:hover{border-color:var(--accent);color:var(--accent)}
+        .lsg{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+        .lsc{padding:.75rem .5rem;border-radius:12px;border:2px solid var(--border);background:var(--card);cursor:pointer;transition:all .25s;text-align:center;position:relative}
+        .lsc:hover{border-color:var(--fg-muted);background:var(--card-hover)}
+        .lsc.on{border-color:var(--accent);background:rgba(0,230,118,.08);box-shadow:0 0 20px rgba(0,230,118,.1)}
+        .lsc .ln{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:1rem;color:var(--fg)}.lsc.on .ln{color:var(--accent)}
+        .lsc .lsub{font-size:.7rem;color:var(--fg-muted);margin-top:.15rem}
+        .lsc .lck{position:absolute;top:.4rem;right:.4rem;width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}.lsc.on .lck{opacity:1}
+        .lst{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted);grid-column:1/-1;padding:.5rem 0 .15rem;border-bottom:1px solid var(--border);margin-bottom:.25rem}
+        @media(max-width:768px){.sn{font-size:1.8rem}.sg{grid-template-columns:1fr}.ht{font-size:2rem!important}.hc{font-size:3.5rem;bottom:-15px}.lsg{grid-template-columns:repeat(3,1fr)}.nlb .lbl{display:none}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    </style>
+</head>
+<body>
+<div class="bg-mesh"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div id="ptc"></div>
+<div class="tc" id="tstC"></div>
+ 
+<!-- NAV -->
+<nav class="nav-bar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+        <div class="flex items-center gap-2 cursor-pointer" onclick='go("home")'>
+            <div style="width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-bolt" style="color:var(--bg);font-size:1.1rem"></i></div>
+            <span style="font-family:'Space Grotesk';font-weight:700;font-size:1.25rem">ReviQ</span>
+        </div>
+        <div class="hidden sm:flex items-center gap-5">
+            <span class="nl on" data-p="home" onclick='go("home")'>Accueil</span>
+            <span class="nl" data-p="subjects" onclick='go("subjects")'>Matières</span>
+            <span class="nl" data-p="dashboard" onclick='go("dashboard")'>Stats</span>
+            <span class="nl" data-p="ranking" onclick='go("ranking")'>Classement</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="nlb" onclick='smo("levelM")' title="Changer de niveau"><i class="fas fa-graduation-cap" style="color:var(--accent3);font-size:.7rem"></i><span class="lbl" id="navLv">Terminale</span><i class="fas fa-chevron-down" style="font-size:.55rem;opacity:.5"></i></div>
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.3)"><span class="sf" style="color:var(--accent2);font-size:1rem"><i class="fas fa-fire"></i></span><span style="color:var(--accent2);font-weight:700;font-family:'Space Grotesk'" id="skC">0</span></div>
+            <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700;color:var(--bg);font-family:'Space Grotesk'" onclick='smo("profM")'>IA</div>
+        </div>
+    </div>
+    <div class="sm:hidden flex items-center justify-around py-2 border-t" style="border-color:var(--border)">
+        <span class="nl on text-xs" data-p="home" onclick='go("home")'><i class="fas fa-home mr-1"></i>Accueil</span>
+        <span class="nl text-xs" data-p="subjects" onclick='go("subjects")'><i class="fas fa-book mr-1"></i>Matières</span>
+        <span class="nl text-xs" onclick='smo("levelM")'><i class="fas fa-graduation-cap mr-1"></i>Niveau</span>
+        <span class="nl text-xs" data-p="ranking" onclick='go("ranking")'><i class="fas fa-trophy mr-1"></i>Rank</span>
+    </div>
+</nav>
+ 
+<!-- PAGE HOME -->
+<div class="pg on" id="pg-home">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+    <section class="text-center mb-10" style="position:relative;overflow:hidden">
+        <div class="hc">ATTALBIOUI</div>
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2)"><span style="width:8px;height:8px;background:var(--accent);border-radius:50%;display:inline-block;animation:pu 2s infinite"></span><span style="color:var(--accent);font-size:.85rem;font-weight:600">2 847 étudiants connectés</span></div>
+        <h1 class="ht" style="font-size:3.5rem;font-weight:700;line-height:1.1;margin-bottom:1.25rem;position:relative;z-index:1">Révise tes examens<br><span style="background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">sans stress</span></h1>
+        <p style="color:var(--fg-muted);font-size:1.15rem;max-width:540px;margin:0 auto .75rem;line-height:1.7;position:relative;z-index:1">Des milliers de questions ciblées, du CM1 a la Terminale.</p>
+        <p style="color:var(--fg-muted);font-size:.78rem;opacity:.5;position:relative;z-index:1;margin-bottom:1.5rem">Créé par <span style="color:var(--accent);font-weight:600">Ismael Attalbioui</span></p>
+    </section>
+    <section class="mb-8">
+        <div class="flex items-center justify-center gap-3 mb-4">
+            <span class="li" id="hLvB"><i class="fas fa-graduation-cap"></i> Terminale</span>
+            <button onclick='smo("levelM")' style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.45rem .85rem;cursor:pointer;color:var(--fg-muted);font-size:.8rem;transition:all .25s;font-family:'Space Grotesk';font-weight:600" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--fg-muted)'"><i class="fas fa-pen mr-1"></i>Changer de niveau</button>
+        </div>
+        <div class="lt2" id="lvTrk"></div>
+    </section>
+    <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
+        <button class="bp text-lg px-8 py-4" onclick='go("subjects")'><i class="fas fa-rocket mr-2"></i>Commencer à réviser</button>
+        <button class="bs text-lg px-8 py-4" onclick="qQuick()"><i class="fas fa-bolt mr-2"></i>Quiz rapide</button>
+    </div>
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+        <div class="cd text-center"><div class="sn" data-t="12450">0</div><p style="color:var(--fg-muted);font-size:.85rem;margin-top:.5rem">Questions</p></div>
+        <div class="cd text-center"><div class="sn" data-t="8">0</div><p style="color:var(--fg-muted);font-size:.85rem;margin-top:.5rem">Matières</p></div>
+        <div class="cd text-center"><div class="sn" data-t="9">0</div><p style="color:var(--fg-muted);font-size:.85rem;margin-top:.5rem">Niveaux</p></div>
+        <div class="cd text-center"><div class="sn" data-t="94">0</div><p style="color:var(--fg-muted);font-size:.85rem;margin-top:.5rem">% de réussite</p></div>
+    </section>
+    <section class="mb-12"><div class="flex items-center justify-between mb-6"><h2 style="font-size:1.75rem;font-weight:700">Matières disponibles</h2><span class="nl" onclick='go("subjects")' style="font-size:.9rem">Voir tout <i class="fas fa-arrow-right ml-1"></i></span></div><div class="sg" id="hSubs"></div></section>
+    <section class="mb-8"><h2 style="font-size:1.75rem;font-weight:700;margin-bottom:1.5rem">Activité récente</h2><div class="cds" id="recAct"><p style="color:var(--fg-muted);text-align:center;padding:2rem">Aucune activité pour le moment.</p></div></section>
+</div>
+</div>
+ 
+<!-- PAGE MATIERES -->
+<div class="pg" id="pg-subjects">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+        <div><h1 style="font-size:2.25rem;font-weight:700;margin-bottom:.25rem">Matières</h1><p style="color:var(--fg-muted)">Choisis une matière pour réviser</p></div>
+        <div style="position:relative"><i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--fg-muted);font-size:.85rem"></i><input type="text" id="sSub" placeholder="Rechercher..." oninput="fltSub()" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.6rem 1rem .6rem 2.5rem;color:var(--fg);font-size:.9rem;outline:none;width:200px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></div>
+    </div>
+    <section class="mb-8"><div class="lt2" id="lvTrk2"></div></section>
+    <div class="sg" id="aSubs"></div>
+</div>
+</div>
+ 
+<!-- PAGE QUIZ -->
+<div class="pg" id="pg-quiz">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <button onclick='smo("quitM")' style="background:var(--card);border:1px solid var(--border);border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--fg-muted);transition:all .2s" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--fg-muted)'"><i class="fas fa-xmark"></i></button>
+            <div class="flex items-center gap-2 flex-wrap"><span id="qSubB" class="cb" style="font-size:.75rem"></span><span id="qModB" class="cb" style="font-size:.75rem;background:rgba(255,107,53,.12);color:var(--accent2)"></span><span id="qLvB" class="cb" style="font-size:.75rem;background:rgba(0,188,212,.12);color:var(--accent3)"></span></div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div id="tmC" class="tr" style="display:none"><svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="30" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="4"/><circle id="tmCi" cx="35" cy="35" r="30" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="0"/></svg><div class="tt" id="tmTx">00:00</div></div>
+            <div class="text-right"><div style="font-family:'Space Grotesk';font-weight:700;font-size:1.1rem" id="qProg">1/10</div><div style="color:var(--fg-muted);font-size:.8rem" id="qSc">Score: 0</div></div>
+        </div>
+    </div>
+    <div class="pb mb-8"><div class="pf" id="qPB" style="width:10%"></div></div>
+    <div id="qCt">
+        <div class="cd mb-6" style="padding:2rem"><p style="color:var(--fg-muted);font-size:.85rem;margin-bottom:.75rem" id="qCat"></p><h2 style="font-size:1.3rem;font-weight:600;line-height:1.6" id="qTx"></h2></div>
+        <div class="flex flex-col gap-3 mb-6" id="qOpts"></div>
+        <div id="expB" style="display:none" class="cd mb-6"><div style="border-left:3px solid var(--accent3);padding-left:1rem"><p style="font-weight:600;margin-bottom:.4rem;color:var(--accent3)"><i class="fas fa-lightbulb mr-1"></i> Explication</p><p style="color:var(--fg-muted);font-size:.9rem;line-height:1.6" id="expTx"></p></div></div>
+        <div class="flex items-center justify-between"><div class="flex items-center gap-2" style="color:var(--fg-muted);font-size:.8rem"><span class="kb">1-4</span><span>Choisir</span><span class="kb ml-2">Enter</span><span>Suivant</span></div><button class="bp" id="nxB" onclick="nxtQ()" style="display:none">Suivant <i class="fas fa-arrow-right ml-2"></i></button></div>
+    </div>
+</div>
+</div>
+ 
+<!-- PAGE RESULTATS -->
+<div class="pg" id="pg-results">
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-12">
+    <div class="text-center mb-8"><div id="rIc" style="width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.5rem"></div><h1 style="font-size:2.5rem;font-weight:700;margin-bottom:.5rem" id="rTi"></h1><p style="color:var(--fg-muted);font-size:1.1rem" id="rSu"></p></div>
+    <div class="flex justify-center mb-8"><div style="position:relative;width:180px;height:180px"><svg width="180" height="180" viewBox="0 0 180 180" style="transform:rotate(-90deg)"><circle cx="90" cy="90" r="78" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/><circle id="rCi" cx="90" cy="90" r="78" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="490" stroke-dashoffset="490"/></svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Space Grotesk';font-weight:700;font-size:3rem" id="rPc">0%</span><span style="color:var(--fg-muted);font-size:.85rem" id="rDt">0/10</span></div></div></div>
+    <div class="grid grid-cols-3 gap-4 mb-8"><div class="cd text-center"><div style="color:var(--success);font-size:1.5rem;font-weight:700;font-family:'Space Grotesk'" id="rOk">0</div><p style="color:var(--fg-muted);font-size:.8rem">Correctes</p></div><div class="cd text-center"><div style="color:var(--danger);font-size:1.5rem;font-weight:700;font-family:'Space Grotesk'" id="rNo">0</div><p style="color:var(--fg-muted);font-size:.8rem">Incorrectes</p></div><div class="cd text-center"><div style="color:var(--warning);font-size:1.5rem;font-weight:700;font-family:'Space Grotesk'" id="rTm">0s</div><p style="color:var(--fg-muted);font-size:.8rem">Temps moyen</p></div></div>
+    <div class="mb-8"><h3 style="font-weight:700;margin-bottom:1rem">Détail des réponses</h3><div class="flex flex-col gap-3" id="rDet"></div></div>
+    <div class="flex flex-wrap gap-3 justify-center"><button class="bp" onclick="rQuiz()"><i class="fas fa-redo mr-2"></i>Recommencer</button><button class="bs" onclick='go("subjects")'><i class="fas fa-book mr-2"></i>Changer de matière</button><button class="bs" onclick='go("dashboard")' style="border-color:var(--accent3);color:var(--accent3)"><i class="fas fa-chart-line mr-2"></i>Voir mes stats</button></div>
+</div>
+</div>
+ 
+<!-- PAGE DASHBOARD -->
+<div class="pg" id="pg-dashboard">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+    <h1 style="font-size:2.25rem;font-weight:700;margin-bottom:.25rem">Tableau de bord</h1><p style="color:var(--fg-muted);margin-bottom:2rem">Suivi de tes performances</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="cd"><div class="flex items-center gap-3 mb-2"><div style="width:40px;height:40px;border-radius:10px;background:rgba(0,230,118,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-check" style="color:var(--accent)"></i></div><span style="color:var(--fg-muted);font-size:.85rem">Quiz terminés</span></div><div style="font-family:'Space Grotesk';font-weight:700;font-size:1.8rem" id="dQz">0</div></div>
+        <div class="cd"><div class="flex items-center gap-3 mb-2"><div style="width:40px;height:40px;border-radius:10px;background:rgba(0,188,212,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-bullseye" style="color:var(--accent3)"></i></div><span style="color:var(--fg-muted);font-size:.85rem">Score moyen</span></div><div style="font-family:'Space Grotesk';font-weight:700;font-size:1.8rem" id="dAv">0%</div></div>
+        <div class="cd"><div class="flex items-center gap-3 mb-2"><div style="width:40px;height:40px;border-radius:10px;background:rgba(255,107,53,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-fire" style="color:var(--accent2)"></i></div><span style="color:var(--fg-muted);font-size:.85rem">Série en cours</span></div><div style="font-family:'Space Grotesk';font-weight:700;font-size:1.8rem" id="dSk">0</div></div>
+        <div class="cd"><div class="flex items-center gap-3 mb-2"><div style="width:40px;height:40px;border-radius:10px;background:rgba(255,193,7,.12);display:flex;align-items:center;justify-content:center"><i class="fas fa-clock" style="color:var(--warning)"></i></div><span style="color:var(--fg-muted);font-size:.85rem">Temps total</span></div><div style="font-family:'Space Grotesk';font-weight:700;font-size:1.8rem" id="dTm">0min</div></div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6 mb-8"><div class="cd"><h3 style="font-weight:700;margin-bottom:1.25rem">Progression (7 derniers jours)</h3><div class="cc"><canvas id="pCh"></canvas></div></div><div class="cd"><h3 style="font-weight:700;margin-bottom:1.25rem">Score par matière</h3><div class="flex flex-col gap-3" id="sSc"></div></div></div>
+    <div class="cd"><h3 style="font-weight:700;margin-bottom:1.25rem">Historique des quiz</h3><div id="qHi"><p style="color:var(--fg-muted);text-align:center;padding:2rem">Aucun quiz terminé.</p></div></div>
+</div>
+</div>
+ 
+<!-- PAGE CLASSEMENT -->
+<div class="pg" id="pg-ranking">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+    <h1 style="font-size:2.25rem;font-weight:700;margin-bottom:.25rem">Classement</h1><p style="color:var(--fg-muted);margin-bottom:2rem">Les meilleurs réviseurs de la semaine</p>
+    <div class="flex items-end justify-center gap-4 mb-10" style="height:240px">
+        <div class="text-center" style="flex:1;max-width:160px"><div style="width:60px;height:60px;border-radius:50%;margin:0 auto .5rem;border:3px solid #C0C0C0;overflow:hidden"><img src="https://picsum.photos/seed/u2/120/120" style="width:100%;height:100%;object-fit:cover"></div><p style="font-weight:600;font-size:.9rem">Lucie M.</p><p style="color:var(--fg-muted);font-size:.8rem">4 280 pts</p><div style="background:linear-gradient(180deg,#C0C0C0,#8a8a8a);border-radius:12px 12px 0 0;margin-top:.75rem;height:100px;display:flex;align-items:center;justify-content:center"><span style="font-family:'Space Grotesk';font-weight:700;font-size:2rem;color:rgba(0,0,0,.5)">2</span></div></div>
+        <div class="text-center" style="flex:1;max-width:160px"><div style="width:70px;height:70px;border-radius:50%;margin:0 auto .5rem;border:3px solid #FFD700;overflow:hidden"><img src="https://picsum.photos/seed/u1/140/140" style="width:100%;height:100%;object-fit:cover"></div><p style="font-weight:600">Hugo D.</p><p style="color:var(--fg-muted);font-size:.8rem">5 120 pts</p><div style="background:linear-gradient(180deg,#FFD700,#b8860b);border-radius:12px 12px 0 0;margin-top:.75rem;height:140px;display:flex;align-items:center;justify-content:center"><span style="font-family:'Space Grotesk';font-weight:700;font-size:2.5rem;color:rgba(0,0,0,.5)">1</span></div></div>
+        <div class="text-center" style="flex:1;max-width:160px"><div style="width:55px;height:55px;border-radius:50%;margin:0 auto .5rem;border:3px solid #CD7F32;overflow:hidden"><img src="https://picsum.photos/seed/u3/110/110" style="width:100%;height:100%;object-fit:cover"></div><p style="font-weight:600;font-size:.9rem">Chloe R.</p><p style="color:var(--fg-muted);font-size:.8rem">3 950 pts</p><div style="background:linear-gradient(180deg,#CD7F32,#8B4513);border-radius:12px 12px 0 0;margin-top:.75rem;height:70px;display:flex;align-items:center;justify-content:center"><span style="font-family:'Space Grotesk';font-weight:700;font-size:1.8rem;color:rgba(0,0,0,.5)">3</span></div></div>
+    </div>
+    <div class="cd" style="padding:0;overflow:hidden"><div id="rkL"></div></div>
+</div>
+</div>
+ 
+<!-- MODAL NIVEAU -->
+<div class="mo" id="levelM">
+<div class="mb">
+    <div class="flex items-center justify-between mb-2"><h3 style="font-weight:700;font-size:1.25rem"><i class="fas fa-graduation-cap mr-2" style="color:var(--accent3)"></i>Mon niveau</h3><button onclick='hmo("levelM")' style="background:none;border:none;color:var(--fg-muted);cursor:pointer;font-size:1.2rem"><i class="fas fa-xmark"></i></button></div>
+    <p style="color:var(--fg-muted);font-size:.85rem;margin-bottom:1.5rem">Sélectionne ton niveau scolaire. Les questions s'adapteront automatiquement.</p>
+    <div class="lsg" id="lvGrid"></div>
+    <button class="bp w-full mt-4" onclick='hmo("levelM")' style="padding:1rem"><i class="fas fa-check mr-2"></i>Confirmer</button>
+</div>
+</div>
+ 
+<!-- MODAL QUITTER -->
+<div class="mo" id="quitM">
+<div class="mb text-center">
+    <div style="width:60px;height:60px;border-radius:50%;background:rgba(255,71,87,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem"><i class="fas fa-exclamation-triangle" style="color:var(--danger);font-size:1.5rem"></i></div>
+    <h3 style="font-weight:700;font-size:1.25rem;margin-bottom:.5rem">Quitter le quiz ?</h3><p style="color:var(--fg-muted);margin-bottom:1.5rem">Ta progression ne sera pas sauvegardée.</p>
+    <div class="flex gap-3 justify-center"><button class="bs" onclick='hmo("quitM")' style="border-color:var(--border);color:var(--fg-muted)">Continuer</button><button class="bp" onclick="qQuit()" style="background:var(--danger)">Quitter</button></div>
+</div>
+</div>
+ 
+<!-- MODAL PROFIL -->
+<div class="mo" id="profM">
+<div class="mb">
+    <div class="flex items-center justify-between mb-4"><h3 style="font-weight:700;font-size:1.25rem">Mon profil</h3><button onclick='hmo("profM")' style="background:none;border:none;color:var(--fg-muted);cursor:pointer;font-size:1.2rem"><i class="fas fa-xmark"></i></button></div>
+    <div class="pcb"><div class="pci">IA</div><div class="flex-1"><div class="flex items-center gap-2 flex-wrap"><span style="font-weight:700;font-size:1rem">Ismael Attalbioui</span><span class="vb"><i class="fas fa-crown" style="font-size:.6rem"></i> Créateur</span></div><p style="color:var(--fg-muted);font-size:.8rem;margin-top:.15rem">Fondateur et développeur de ReviQ</p></div></div>
+    <div class="flex items-center gap-4 mb-6"><div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.5rem;color:var(--bg);font-family:'Space Grotesk'">IA</div><div><h4 style="font-weight:700">Ismael Attalbioui</h4><p style="color:var(--fg-muted);font-size:.85rem">Niveau : <span id="pLv">Terminale</span></p></div></div>
+    <div class="flex flex-col gap-3 mb-6">
+        <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--card)"><span style="color:var(--fg-muted);font-size:.9rem"><i class="fas fa-star mr-2" style="color:var(--warning)"></i>Points totaux</span><span style="font-weight:700;font-family:'Space Grotesk'" id="pPt">0</span></div>
+        <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--card)"><span style="color:var(--fg-muted);font-size:.9rem"><i class="fas fa-fire mr-2" style="color:var(--accent2)"></i>Meilleure série</span><span style="font-weight:700;font-family:'Space Grotesk'" id="pBs">0</span></div>
+        <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--card)"><span style="color:var(--fg-muted);font-size:.9rem"><i class="fas fa-code mr-2" style="color:var(--accent)"></i>Role</span><span style="font-weight:700;font-family:'Space Grotesk';color:var(--accent)">Créateur &amp; Dev</span></div>
+    </div>
+    <button class="bs w-full" onclick="rstAll()" style="border-color:var(--danger);color:var(--danger)"><i class="fas fa-trash mr-2"></i>Réinitialiser mes données</button>
+</div>
+</div>
+ 
+<!-- MODAL CONFIG QUIZ -->
+<div class="mo" id="cfgM">
+<div class="mb">
+    <div class="flex items-center justify-between mb-6"><h3 style="font-weight:700;font-size:1.25rem" id="cfgTi">Configurer le quiz</h3><button onclick='hmo("cfgM")' style="background:none;border:none;color:var(--fg-muted);cursor:pointer;font-size:1.2rem"><i class="fas fa-xmark"></i></button></div>
+    <div class="flex flex-col gap-4 mb-6">
+        <div><label style="font-weight:600;font-size:.9rem;display:block;margin-bottom:.5rem">Nombre de questions</label><div class="flex gap-2" id="qcBts"><button class="bs flex-1 qcb" data-c="5" style="padding:.6rem">5</button><button class="bp flex-1 qcb" data-c="10" style="padding:.6rem">10</button><button class="bs flex-1 qcb" data-c="20" style="padding:.6rem">20</button></div></div>
+        <div><label style="font-weight:600;font-size:.9rem;display:block;margin-bottom:.5rem">Mode</label><div class="flex gap-2"><button class="bp flex-1 mdb" data-m="training" style="padding:.6rem"><i class="fas fa-dumbbell mr-1"></i> Entraînement</button><button class="bs flex-1 mdb" data-m="exam" style="padding:.6rem"><i class="fas fa-clock mr-1"></i> Examen</button></div></div>
+        <div id="tmCfg" style="display:none"><label style="font-weight:600;font-size:.9rem;display:block;margin-bottom:.5rem">Temps par question</label><div class="flex gap-2" id="tmbBts"><button class="bs flex-1 tmb" data-t="15" style="padding:.6rem">15s</button><button class="bp flex-1 tmb" data-t="30" style="padding:.6rem">30s</button><button class="bs flex-1 tmb" data-t="60" style="padding:.6rem">60s</button></div></div>
+    </div>
+    <button class="bp w-full" onclick="lQuiz()" style="padding:1rem"><i class="fas fa-play mr-2"></i>Lancer le quiz</button>
+</div>
+</div>
+ 
+<!-- FOOTER -->
+<footer class="cf" id="appFt">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3"><div style="width:28px;height:28px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-bolt" style="color:var(--bg);font-size:.75rem"></i></div><span style="font-family:'Space Grotesk';font-weight:700;font-size:.95rem">ReviQ</span></div>
+        <div class="crb"><div class="cav">IA</div><span>Créé par <strong>Ismael Attalbioui</strong></span><i class="fas fa-crown" style="color:var(--warning);font-size:.7rem"></i></div>
+        <p style="color:var(--fg-muted);font-size:.75rem">2025 — Tous droits réservés</p>
+    </div>
+</div>
+</footer>
+ 
+<script>
+/* ===== NIVEAUX ===== */
+const LVS=[
+    {id:"cm1",n:"CM1",s:"Primaire"},
+    {id:"cm2",n:"CM2",s:"Primaire"},
+    {id:"6eme",n:"6ème",s:"Collège"},
+    {id:"5eme",n:"5ème",s:"Collège"},
+    {id:"4eme",n:"4ème",s:"Collège"},
+    {id:"3eme",n:"3ème",s:"Collège"},
+    {id:"2nde",n:"2nde",s:"Lycée"},
+    {id:"1ere",n:"1ère",s:"Lycée"},
+    {id:"term",n:"Terminale",s:"Lycée"}
+];
+const LO=LVS.map(l=>l.id);
+function li(id){return LO.indexOf(id)}
+ 
+/* ===== MATIERES & QUESTIONS ===== */
+const SUBS=[
+{id:"maths",n:"Mathématiques",ic:"fa-square-root-variable",cl:"#00e676",bg:"rgba(0,230,118,.12)",ml:"cm1",
+qs:[
+{q:"Combien font 7 x 8 ?",o:["54","56","58","64"],a:1,e:"7 x 8 = 56, une table a connaitre par coeur.",c:"Calcul",lv:"cm1"},
+{q:"Quel est le double de 45 ?",o:["80","85","90","95"],a:2,e:"Le double de 45 est 45 x 2 = 90.",c:"Calcul",lv:"cm1"},
+{q:"Combien y a-t-il de minutes dans une heure ?",o:["50","60","100","120"],a:1,e:"1 heure = 60 minutes.",c:"Grandeurs",lv:"cm1"},
+{q:"Un triangle a combien de côtés ?",o:["2","3","4","5"],a:1,e:"Un triangle a 3 côtés. Tri = trois.",c:"Géométrie",lv:"cm1"},
+{q:"Quelle est la moitie de 30 ?",o:["10","12","15","20"],a:2,e:"La moitie de 30 est 30 / 2 = 15.",c:"Calcul",lv:"cm1"},
+{q:"Combien font 125 x 4 ?",o:["400","450","500","525"],a:2,e:"125 x 4 = 500. On calcule 100x4 + 25x4.",c:"Calcul",lv:"cm2"},
+{q:"Un carré de côté 5 cm a un périmètre de :",o:["10 cm","15 cm","20 cm","25 cm"],a:2,e:"Périmètre = 4 x côté = 4 x 5 = 20 cm.",c:"Géométrie",lv:"cm2"},
+{q:"Quel est le plus grand : 0,5 ou 0,45 ?",o:["0,5","0,45","Egaux","On ne sait pas"],a:0,e:"0,5 = 0,50, qui est plus grand que 0,45.",c:"Nombres",lv:"cm2"},
+{q:"Que signifie le chiffre 5 dans 3 542 ?",o:["5 unités","5 dizaines","5 centaines","5 milliers"],a:1,e:"Dans 3542, le 5 est dans la position des dizaines.",c:"Nombres",lv:"6eme"},
+{q:"Un angle droit mesure :",o:["45 degrés","60 degrés","90 degrés","180 degrés"],a:2,e:"Un angle droit = 90 degrés.",c:"Géométrie",lv:"6eme"},
+{q:"Que vaut 20% de 150 ?",o:["20","25","30","35"],a:2,e:"20% de 150 = (20/100) x 150 = 30.",c:"Proportionnalité",lv:"5eme"},
+{q:"Combien font (-4) x (-3) ?",o:["-12","-7","7","12"],a:3,e:"Le produit de deux négatifs est positif : 12.",c:"Nombres relatifs",lv:"5eme"},
+{q:"Si a carré + b carré = 169 et a = 5, que vaut b ?",o:["8","10","12","13"],a:2,e:"b carré = 169 - 25 = 144, donc b = 12.",c:"Pythagore",lv:"4eme"},
+{q:"Combien font 10 puissance 3 ?",o:["30","100","1000","10000"],a:2,e:"10^3 = 10 x 10 x 10 = 1000.",c:"Puissances",lv:"4eme"},
+{q:"Resoudre : x + 7 = 15",o:["x = 6","x = 7","x = 8","x = 22"],a:2,e:"x = 15 - 7 = 8.",c:"Équations",lv:"4eme"},
+{q:"Resoudre : 2x - 3 = 7",o:["x = 2","x = 3","x = 5","x = 10"],a:2,e:"2x = 10, donc x = 5.",c:"Équations",lv:"3eme"},
+{q:"Que vaut (racine de 3) au carré ?",o:["3","racine de 3","6","9"],a:0,e:"(racine de a) au carré = a. Donc = 3.",c:"Racines carrées",lv:"3eme"},
+{q:"L'ensemble des nombres réels est note :",o:["N","Z","Q","R"],a:3,e:"R = ensemble des réels.",c:"Ensembles",lv:"2nde"},
+{q:"La forme développée de (x+2)(x-3) est :",o:["x carré - x - 6","x carré - x + 6","x carré + 5x - 6","x carré - 5x + 6"],a:0,e:"(x+2)(x-3) = x carré - 3x + 2x - 6 = x carré - x - 6.",c:"Calcul algébrique",lv:"2nde"},
+{q:"La dérivée de f(x) = x carré est :",o:["x","2x","2x carré","x/2"],a:1,e:"La dérivée de x^n est n x x^(n-1). Donc 2x.",c:"Dérivation",lv:"1ere"},
+{q:"Si P(A) = 0,3, alors P(non A) vaut :",o:["0,3","0,7","1,3","0"],a:1,e:"P(non A) = 1 - P(A) = 0,7.",c:"Probabilités",lv:"1ere"},
+{q:"La dérivée de f(x) = x cube est :",o:["3x","3x carré","x carré","3x cube"],a:1,e:"Dérivée de x^3 = 3x^2.",c:"Analyse",lv:"term"},
+{q:"Quelle est la limite de sin(x)/x quand x tend vers 0 ?",o:["0","1","plus infini","n'existe pas"],a:1,e:"Limite classique : lim(x vers 0) sin(x)/x = 1.",c:"Limites",lv:"term"},
+{q:"Si f(x) = e^(2x), alors f'(x) = ?",o:["e^(2x)","2e^(2x)","2xe^(2x)","e^(2x)/2"],a:1,e:"Dérivée de e^(ax) = a x e^(ax). Donc 2e^(2x).",c:"Analyse",lv:"term"},
+{q:"Le discriminant de ax carré + bx + c est :",o:["b carré - 4ac","b carré + 4ac","4ac - b carré","a carré - bc"],a:0,e:"Delta = b carré - 4ac.",c:"Algèbre",lv:"term"}
+]},
+{id:"fr",n:"Français",ic:"fa-pen-fancy",cl:"#ab47bc",bg:"rgba(171,71,188,.12)",ml:"cm1",
+qs:[
+{q:"Quel est le pluriel de cheval ?",o:["chevals","chevaux","chevauxs","chevalles"],a:1,e:"Le pluriel de cheval est chevaux.",c:"Orthographe",lv:"cm1"},
+{q:"Dans 'Le chat dort', le sujet est :",o:["Le","chat","dort","La phrase"],a:1,e:"Le sujet est 'chat', il fait l'action.",c:"Grammaire",lv:"cm1"},
+{q:"Quelle est la nature de 'rapidement' ?",o:["Un adjectif","Un nom","Un adverbe","Un verbe"],a:2,e:"'Rapidement' est un adverbe de manière.",c:"Grammaire",lv:"cm2"},
+{q:"Le passé composé se forme avec :",o:["Imparfait + participe passé","Auxiliaire être/avoir + participe passé","Futur + infinitif","Présent + gérondif"],a:1,e:"Passé composé = auxiliaire au présent + participe passé.",c:"Conjugaison",lv:"6eme"},
+{q:"Une phrase interrogative sert à :",o:["Donner un ordre","Exprimer un sentiment","Poser une question","Raconter"],a:2,e:"Phrase interrogative = pose une question.",c:"Types de phrases",lv:"6eme"},
+{q:"Que signifie 'inhabituel' ?",o:["Très habituel","Pas habituel","Plus habituel","Habituel"],a:1,e:"Le préfixe 'in-' donne un sens contraire.",c:"Vocabulaire",lv:"5eme"},
+{q:"Quel est le COD dans 'Je mange la pomme' ?",o:["Je","mange","la pomme","Aucun"],a:2,e:"'La pomme' répond à 'Je mange quoi ?'.",c:"Grammaire",lv:"4eme"},
+{q:"Au passé simple, 'aller' 3e pers. sing. donne :",o:["Il alla","Il allait","Il est allé","Il ira"],a:0,e:"Passé simple de aller : il alla.",c:"Conjugaison",lv:"4eme"},
+{q:"Une métaphore est :",o:["Une comparaison avec 'comme'","Un remplacement sans outil de comparaison","Une exagération","Une opposition"],a:1,e:"Metaphore = comparaison sans 'comme', 'tel'...",c:"Figures de style",lv:"3eme"},
+{q:"Un sonnet est un poème de :",o:["8 vers","10 vers","14 vers","16 vers"],a:2,e:"Sonnet = 14 vers : 2 quatrains + 2 tercets.",c:"Poésie",lv:"1ere"},
+{q:"Le subjonctif est obligatoire après :",o:["Je pense que","Il faut que","Je sais que","Il paraît que"],a:1,e:"'Il faut que' impose le subjonctif.",c:"Grammaire",lv:"term"},
+{q:"Quel mouvement littéraire est associé à Baudelaire ?",o:["Le romantisme","Le réalisme","Le symbolisme","Le naturalisme"],a:2,e:"Baudelaire est une figure du symbolisme.",c:"Littérature",lv:"term"}
+]},
+{id:"phys",n:"Physique-Chimie",ic:"fa-atom",cl:"#00bcd4",bg:"rgba(0,188,212,.12)",ml:"6eme",
+qs:[
+{q:"L'eau se transforme en glace à :",o:["0 degrés C","100 degrés C","50 degrés C","-10 degrés C"],a:0,e:"L'eau gèle à 0 degrés C.",c:"Matière",lv:"6eme"},
+{q:"Les trois états de la matière sont :",o:["Solide, liquide, gazeux","Dur, mou, fluide","Froid, chaud, tiède","Lourd, moyen, léger"],a:0,e:"Les 3 états : solide, liquide, gazeux.",c:"Matière",lv:"6eme"},
+{q:"L'unité de la tension électrique est :",o:["L'ampere","Le watt","Le volt","L'ohm"],a:2,e:"La tension s'exprime en volts (V).",c:"Électricité",lv:"4eme"},
+{q:"La loi d'Ohm s'écrit :",o:["U = R/I","U = R x I","U = R + I","U = R - I"],a:1,e:"U = R x I.",c:"Électricité",lv:"4eme"},
+{q:"L'unité de la force est :",o:["Le joule","Le newton","Le watt","Le pascal"],a:1,e:"L'unite de force est le newton (N).",c:"Mécanique",lv:"3eme"},
+{q:"L'énergie cinétique est :",o:["m x v","m x v carré","1/2 x m x v carré","2 x m x v carré"],a:2,e:"Ec = 1/2 x m x v carré.",c:"Énergie",lv:"2nde"},
+{q:"La vitesse de la lumière dans le vide est environ :",o:["3x10 puissance 6 m/s","3x10 puissance 8 m/s","3x10 puissance 10 m/s","3x10 puissance 5 m/s"],a:1,e:"c environ 3x10^8 m/s.",c:"Ondes",lv:"term"},
+{q:"Le pH d'une solution neutre à 25 degrés C est :",o:["0","7","14","1"],a:1,e:"pH neutre = 7.",c:"Chimie",lv:"term"}
+]},
+{id:"svt",n:"SVT",ic:"fa-dna",cl:"#66bb6a",bg:"rgba(102,187,106,.12)",ml:"6eme",
+qs:[
+{q:"Les organismes vivants sont composés de :",o:["Roches","Cellules","Metal","Plastique"],a:1,e:"Tous les êtres vivants sont composes de cellules.",c:"Cellule",lv:"6eme"},
+{q:"La photosynthèse se déroule dans :",o:["Les mitochondries","Les chloroplastes","Le noyau","Le reticulum"],a:1,e:"La photosynthèse a lieu dans les chloroplastes.",c:"Végétaux",lv:"4eme"},
+{q:"Le glucose est un :",o:["Acide gras","Acide aminé","Glucide","Nucléotide"],a:2,e:"Le glucose est un glucide (sucre simple).",c:"Biochimie",lv:"3eme"},
+{q:"La transcription produit :",o:["Une protéine","Un ARN","De l'ADN","Un lipide"],a:1,e:"Transcription = synthèse d'ARN à partir d'ADN.",c:"Génétique",lv:"2nde"},
+{q:"Où se trouve l'ADN dans la cellule ?",o:["Dans le cytoplasme","Dans le noyau","Dans les ribosomes","Dans la membrane"],a:1,e:"L'ADN est principalement dans le noyau.",c:"Génétique",lv:"term"},
+{q:"La meiose produit :",o:["2 cellules identiques","4 cellules hapoïdes","4 cellules diploïdes","1 cellule"],a:1,e:"La meiose produit 4 cellules hapoïdes.",c:"Génétique",lv:"term"},
+{q:"Les neurones communiquent via :",o:["Des synapses","Des mitochondries","Des lysosomes","Des vacuoles"],a:0,e:"La transmission nerveuse se fait aux synapses.",c:"Neurosciences",lv:"term"},
+{q:"La respiration cellulaire produit :",o:["Du glucose","De l'O2","De l'ATP et du CO2","De l'eau uniquement"],a:2,e:"La respiration cellulaire produit de l'ATP et du CO2.",c:"Métabolisme",lv:"term"}
+]},
+{id:"hg",n:"Histoire-Géo",ic:"fa-landmark",cl:"#ff6b35",bg:"rgba(255,107,53,.12)",ml:"6eme",
+qs:[
+{q:"Les Egyptiens anciens vivaient près de :",o:["Le fleuve Jaune","Le Nil","Le Danube","La Seine"],a:1,e:"La civilisation égyptienne s'est développée dans la vallée du Nil.",c:"Antiquité",lv:"6eme"},
+{q:"Le Moyen Âge se situe environ entre :",o:["-3000 et -500","476 et 1492","1789 et 1815","1914 et 1918"],a:1,e:"Moyen Age : chute de Rome (476) à découverte de l'Amérique (1492).",c:"Périodes",lv:"5eme"},
+{q:"La Révolution française a commencé en :",o:["1776","1789","1792","1804"],a:1,e:"La Révolution débute en 1789.",c:"France",lv:"4eme"},
+{q:"La Première Guerre mondiale s'est déroulée de :",o:["1912-1918","1914-1918","1914-1920","1913-1917"],a:1,e:"1914-1918, achevée par l'armistice du 11 novembre 1918.",c:"Guerres",lv:"3eme"},
+{q:"Le mur de Berlin est tombé en :",o:["1987","1989","1991","1985"],a:1,e:"Le 9 novembre 1989.",c:"Guerre froide",lv:"3eme"},
+{q:"Le traité de Westphalie (1648) a :",o:["Uni l'Europe","Mis fin à la guerre de Trente Ans","Créé l'ONU","Instaure la République"],a:1,e:"Les traités de Westphalie ont mis fin à la guerre de Trente Ans.",c:"Europe",lv:"2nde"},
+{q:"La colonisation de l'Afrique a été principalement :",o:["Au Moyen Age","Au XIXe siècle","Après 1945","Au XVIIIe siècle"],a:1,e:"Partage de l'Afrique au XIXe siècle.",c:"Colonisation",lv:"term"},
+{q:"Quel pays possède la plus grande forêt tropicale ?",o:["Indonésie","Brésil","Congo","Colombie"],a:1,e:"Le Brésil possède la forêt amazonienne.",c:"Géographie",lv:"term"}
+]},
+{id:"ang",n:"Anglais",ic:"fa-language",cl:"#42a5f5",bg:"rgba(66,165,245,.12)",ml:"cm2",
+qs:[
+{q:"Comment dit-on 'chat' en anglais ?",o:["Dog","Cat","Bird","Fish"],a:1,e:"Chat = cat en anglais.",c:"Vocabulaire",lv:"cm2"},
+{q:"Quel est le prétérit de 'go' ?",o:["Goed","Went","Gone","Going"],a:1,e:"Le prétérit irrégulier de 'go' est 'went'.",c:"Temps",lv:"6eme"},
+{q:"Complète : 'She ___ a student.'",o:["are","is","am","be"],a:1,e:"Avec 'she', 3e personne du singulier, on utilise 'is'.",c:"Grammaire",lv:"5eme"},
+{q:"Le past perfect s'utilise pour :",o:["Des actions en cours","Des actions antérieures à une autre action passée","Des actions futures","Des habitudes passees"],a:1,e:"Past perfect = action achevée avant une autre dans le passé.",c:"Temps",lv:"3eme"},
+{q:"Choisis : 'If I ___ rich, I would travel.'",o:["am","was","were","will be"],a:2,e:"Second conditionnel : 'were' pour toutes les personnes.",c:"Conditionnels",lv:"3eme"},
+{q:"Quelle est la traduction de 'Bien que' ?",o:["Although","Because","Therefore","However"],a:0,e:"'Although' = bien que.",c:"Grammaire",lv:"term"},
+{q:"Le superlatif de 'good' est :",o:["Goodest","More good","Best","Most good"],a:2,e:"Superlatif irregulier : good -> better -> best.",c:"Adjectifs",lv:"term"},
+{q:"'I wish I ___ taller.'",o:["am","was","were","will be"],a:2,e:"Après 'wish', on utilise le prétérit : 'were'.",c:"Conditionnels",lv:"term"}
+]},
+{id:"phil",n:"Philosophie",ic:"fa-brain",cl:"#ef5350",bg:"rgba(239,83,80,.12)",ml:"1ere",
+qs:[
+{q:"La philosophie signifie littéralement :",o:["Amour du savoir","Haine de l'ignorance","Recherche de la richesse","Étude de la nature"],a:0,e:"Philosophie vient du grec 'philos' (ami) et 'sophia' (sagesse).",c:"Introduction",lv:"1ere"},
+{q:"Pour Sartre, 'l'existence précède l'essence' signifie :",o:["Dieu cree l'homme","L'homme se définit par ses actes","La nature est première","L'homme a un destin fixe"],a:1,e:"L'existentialisme : l'homme existe d'abord, puis se construit.",c:"Existentialisme",lv:"1ere"},
+{q:"Pour Descartes, la première vérité certaine est :",o:["Le monde existe","Je pense donc je suis","Dieu existe","Les sens sont fiables"],a:1,e:"'Cogito ergo sum' : le doute prouve la pensee, donc l'existence.",c:"Métaphysique",lv:"term"},
+{q:"L'allégorie de la caverne est de :",o:["Aristote","Platon","Socrate","Epicure"],a:1,e:"Platon la décrit dans La République.",c:"Connaissance",lv:"term"},
+{q:"Kant distingue le phénomène du noumène. Le noumene est :",o:["Ce qui apparaît","La chose en soi","L'illusion","Le sentiment"],a:1,e:"Le noumène = la chose en soi.",c:"Connaissance",lv:"term"},
+{q:"Selon Hobbes, l'état de nature est :",o:["Un état de paix","La guerre de tous contre tous","Un état de coopération","Un mythe"],a:1,e:"Hobbes : état de nature = guerre de tous contre tous.",c:"Politique",lv:"term"},
+{q:"Nietzsche declare la 'mort de Dieu' pour exprimer :",o:["Son athéisme","La crise des valeurs de la modernité","La victoire de la science","La fin de la religion"],a:1,e:"La mort de Dieu symbolise l'effondrement des valeurs traditionnelles.",c:"Morale",lv:"term"},
+{q:"Pour Rousseau, l'homme est corrompu par :",o:["La religion","La société","La nature","La science"],a:1,e:"Rousseau : l'homme est bon par nature mais corrompu par la société.",c:"Politique",lv:"term"}
+]},
+{id:"ses",n:"SES",ic:"fa-chart-pie",cl:"#ffa726",bg:"rgba(255,167,38,.12)",ml:"2nde",
+qs:[
+{q:"L'économie étudie :",o:["Les lois de la nature","La production et répartition des richesses","Les règles de grammaire","Les mouvements planétaires"],a:1,e:"L'économie étudie la production et répartition des richesses.",c:"Introduction",lv:"2nde"},
+{q:"Le PIB mesure :",o:["La richesse des ménages","La production de biens et services","Les exportations","La population active"],a:1,e:"PIB = valeur de la production totale.",c:"Économie",lv:"2nde"},
+{q:"L'inflation est :",o:["La hausse des prix","La baisse des prix","La hausse du chômage","La croissance du PIB"],a:0,e:"Inflation = hausse généralisée des prix.",c:"Macroéconomie",lv:"1ere"},
+{q:"Le taux de chomage se calcule comme :",o:["Chômeurs / Population totale","Chômeurs / Population active","Chômeurs / Actifs occupés","Chômeurs / Population inactive"],a:1,e:"Taux de chômage = Chômeurs / Population active x 100.",c:"Travail",lv:"1ere"},
+{q:"La socialisation primaire désigne :",o:["L'école","La famille et l'entourage proche","Les medias","Le travail"],a:1,e:"Socialisation primaire = enfance, principalement par la famille.",c:"Sociologie",lv:"term"},
+{q:"Selon Bourdieu, le capital culturel est :",o:["L'argent possede","Les diplômes et savoirs","Les relations sociales","Le patrimoine génétique"],a:1,e:"Capital culturel = diplômes, savoirs, compétences acquises.",c:"Sociologie",lv:"term"},
+{q:"La valeur ajoutée est :",o:["Le chiffre d'affaires","CA moins consommations intermédiaires","Le bénéfice","Les salaires versés"],a:1,e:"VA = CA - Consommations intermediaires.",c:"Économie",lv:"term"},
+{q:"La mobilité sociale ascendante désigne :",o:["Un déclassement","Une promotion sociale par rapport aux parents","Un changement de région","L'immigration"],a:1,e:"Mobilite ascendante = position sociale supérieure aux parents.",c:"Sociologie",lv:"term"}
+]}
+];
+ 
+const RKD=[
+{name:"Hugo D.",sc:5120,av:"u1",qz:89,av2:94},
+{name:"Lucie M.",sc:4280,av:"u2",qz:76,av2:91},
+{name:"Chloe R.",sc:3950,av:"u3",qz:71,av2:89},
+{name:"Nathan B.",sc:3720,av:"u4",qz:68,av2:87},
+{name:"Emma L.",sc:3580,av:"u5",qz:65,av2:86},
+{name:"Thomas P.",sc:3210,av:"u6",qz:59,av2:84},
+{name:"Manon D.",sc:3050,av:"u7",qz:55,av2:83},
+{name:"Lucas G.",sc:2890,av:"u8",qz:52,av2:82},
+{name:"Camille V.",sc:2670,av:"u9",qz:48,av2:80},
+{name:"Ismael Attalbioui",sc:0,av:"u10",qz:0,av2:0,me:true}
+];
+ 
+/* ===== ETAT ===== */
+let S={pg:"home",lv:"term",qs:null,us:{tq:0,tc:0,tqn:0,tt:0,sk:0,bsk:0,pt:0,hi:[],ss:{},ds:{}}};
+ 
+/* ===== INIT ===== */
+function init(){
+    ldS();
+    var sl=localStorage.getItem("rq_lv");
+    if(sl&&LO.indexOf(sl)>=0)S.lv=sl;
+    mkPtc();
+    rLvSels();
+    rLvGrid();
+    rHSubs();
+    rASubs();
+    rRk();
+    aniSn();
+    uDash();
+    uSk();
+    document.addEventListener("keydown",hKb);
+}
+ 
+function ldS(){try{var s=localStorage.getItem("rq_s");if(s){var p=JSON.parse(s);S.us={tq:0,tc:0,tqn:0,tt:0,sk:0,bsk:0,pt:0,hi:[],ss:{},ds:{}};for(var k in p)if(S.us.hasOwnProperty(k))S.us[k]=p[k];}}catch(e){}}
+function svS(){try{localStorage.setItem("rq_s",JSON.stringify(S.us));}catch(e){}}
+ 
+function mkPtc(){var c=document.getElementById("ptc");for(var i=0;i<12;i++){var p=document.createElement("div");p.className="fp";p.style.left=Math.random()*100+"%";p.style.top=Math.random()*100+"%";var sz=2+Math.random()*3;p.style.width=sz+"px";p.style.height=sz+"px";p.style.opacity=.1+Math.random()*.15;p.style.animation="bf "+(15+Math.random()*25)+"s ease-in-out infinite";p.style.animationDelay="-"+Math.random()*20+"s";c.appendChild(p);}}
+ 
+/* ===== NIVEAUX ===== */
+function rLvSels(){
+    var h="";LVS.forEach(function(l){h+='<div class="lp'+(l.id===S.lv?" on":"")+'" data-lv="'+l.id+'" onclick="selLv(\''+l.id+'\')">'+l.n+'<span class="ls">'+l.s+'</span></div>';});
+    var t1=document.getElementById("lvTrk"),t2=document.getElementById("lvTrk2");
+    if(t1)t1.innerHTML=h;if(t2)t2.innerHTML=h;
+    uLvBadge();
+}
+ 
+function rLvGrid(){
+    var h="";
+    var sections=["Primaire","Collège","Lycée"];
+    sections.forEach(function(sec){
+        h+='<div class="lst">'+sec+'</div>';
+        LVS.forEach(function(l){
+            if(l.s!==sec)return;
+            h+='<div class="lsc'+(l.id===S.lv?" on":"")+'" data-lv="'+l.id+'" onclick="selLv(\''+l.id+'\')">';
+            h+='<div class="lck"><i class="fas fa-check" style="color:var(--bg);font-size:.6rem"></i></div>';
+            h+='<div class="ln">'+l.n+'</div>';
+            h+='<div class="lsub">'+l.s+'</div></div>';
+        });
+    });
+    document.getElementById("lvGrid").innerHTML=h;
+}
+ 
+function selLv(id){
+    S.lv=id;
+    localStorage.setItem("rq_lv",id);
+    /* Mettre a jour toutes les pills */
+    document.querySelectorAll(".lp").forEach(function(p){p.classList.toggle("on",p.getAttribute("data-lv")===id);});
+    document.querySelectorAll(".lsc").forEach(function(p){p.classList.toggle("on",p.getAttribute("data-lv")===id);});
+    uLvBadge();
+    rHSubs();
+    rASubs();
+    var lv=LVS[li(id)];
+    toast("Niveau "+lv.n+" ("+lv.s+") sélectionné","info");
+}
+ 
+function uLvBadge(){
+    var lv=LVS[li(S.lv)];
+    var b=document.getElementById("hLvB");if(b)b.innerHTML='<i class="fas fa-graduation-cap"></i> '+lv.n;
+    var nb=document.getElementById("navLv");if(nb)nb.textContent=lv.n;
+    var pb=document.getElementById("pLv");if(pb)pb.textContent=lv.n;
+}
+ 
+function gQs(sid){var s=SUBS.find(function(x){return x.id===sid;});if(!s)return[];var idx=li(S.lv);return s.qs.filter(function(q){return li(q.lv)<=idx;});}
+function isAvail(sid){var s=SUBS.find(function(x){return x.id===sid;});if(!s)return false;return li(S.lv)>=li(s.ml);}
+ 
+/* ===== NAVIGATION ===== */
+function go(pid){
+    S.pg=pid;
+    document.querySelectorAll(".pg").forEach(function(p){p.classList.remove("on");});
+    document.getElementById("pg-"+pid).classList.add("on");
+    document.querySelectorAll(".nl[data-p]").forEach(function(l){l.classList.toggle("on",l.getAttribute("data-p")===pid);});
+    document.getElementById("appFt").style.display=pid==="quiz"?"none":"block";
+    if(pid==="dashboard")uDash();
+    if(pid==="home"){rHSubs();uRecAct();aniSn();}
+    if(pid==="subjects")rASubs();
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+ 
+function smo(id){document.getElementById(id).classList.add("sh");}
+function hmo(id){document.getElementById(id).classList.remove("sh");}
+ 
+function toast(msg,type){
+    type=type||"success";
+    var c=document.getElementById("tstC"),t=document.createElement("div");t.className="ts";
+    var ic={success:"fa-check-circle",error:"fa-times-circle",info:"fa-info-circle",warning:"fa-exclamation-circle"};
+    var co={success:"var(--success)",error:"var(--danger)",info:"var(--accent3)",warning:"var(--warning)"};
+    t.innerHTML='<i class="fas '+ic[type]+'" style="color:'+co[type]+';font-size:1.2rem"></i><span style="font-size:.9rem">'+msg+'</span>';
+    c.appendChild(t);setTimeout(function(){if(t.parentNode)t.remove();},3000);
+}
+ 
+/* ===== CARTES MATIERES ===== */
+function mCard(s,compact){
+    var av=isAvail(s.id),qs=gQs(s.id);
+    var ss=S.us.ss[s.id]||{tc:0,tqn:0,qz:0,lvls:{}};
+    var ls=ss.lvls?ss.lvls[S.lv]||{tc:0,tqn:0,qz:0}:{tc:ss.tc,tqn:ss.tqn,qz:ss.qz};
+    var pct=ls.tqn>0?Math.round(ls.tc/ls.tqn*100):0;
+    var lk=!av;
+    var cls=compact?"cd":"cd";
+    if(lk)cls+=" sl";
+    var h='<div class="'+cls+'" style="position:relative;'+(compact?"padding:1rem;":"")+'" '+(lk?"":'onclick="oCfg(\''+s.id+'\')"')+' >';
+    if(lk)h+='<div class="lo"><span style="background:var(--card);border:1px solid var(--border);padding:.4rem .8rem;border-radius:8px;font-size:.8rem;color:var(--fg-muted)"><i class="fas fa-lock mr-1"></i>Dispo. en '+LVS[li(s.ml)].n+'</span></div>';
+    h+='<div class="flex items-center gap-3 mb-3"><div style="width:44px;height:44px;border-radius:12px;background:'+s.bg+';display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas '+s.ic+'" style="color:'+s.cl+';font-size:1.1rem"></i></div><div class="flex-1 min-w-0"><h3 style="font-weight:700;font-size:'+(compact?'.95rem':'1.05rem')+'" class="truncate">'+s.n+'</h3><p style="color:var(--fg-muted);font-size:.8rem">'+qs.length+' question'+(qs.length!==1?"s":"")+' pour ce niveau</p></div></div>';
+    if(!compact&&!lk)h+='<div class="pb mb-2"><div class="pf" style="width:'+pct+'%;background:linear-gradient(90deg,'+s.cl+','+s.cl+'88)"></div></div><div class="flex items-center justify-between"><span style="color:var(--fg-muted);font-size:.8rem">'+ls.qz+' quiz'+(ls.qz!==1?"s":"")+'</span><span style="color:'+s.cl+';font-weight:700;font-size:.85rem;font-family:Space Grotesk">'+pct+'%</span></div>';
+    h+='</div>';return h;
+}
+function rHSubs(){document.getElementById("hSubs").innerHTML=SUBS.map(function(s){return mCard(s);}).join("");}
+function rASubs(){var q=document.getElementById("sSub").value.toLowerCase();var f=SUBS.filter(function(s){return s.n.toLowerCase().indexOf(q)>=0;});document.getElementById("aSubs").innerHTML=f.length?f.map(function(s){return mCard(s);}).join(""):'<p style="color:var(--fg-muted);text-align:center;padding:3rem;grid-column:1/-1">Aucune matière trouvée.</p>';}
+function fltSub(){rASubs();}
+ 
+/* ===== CONFIG QUIZ ===== */
+var CF={sid:"",qc:10,md:"training",tp:30};
+ 
+function oCfg(sid){
+    CF={sid:sid,qc:10,md:"training",tp:30};
+    var s=SUBS.find(function(x){return x.id===sid;}),qs=gQs(sid),lv=LVS[li(S.lv)];
+    document.getElementById("cfgTi").textContent="Quiz "+s.n+" — "+lv.n;
+    document.querySelectorAll(".qcb").forEach(function(b){b.className=(b.getAttribute("data-c")==="10"?"bp":"bs")+" flex-1 qcb";b.style.padding=".6rem";});
+    document.querySelectorAll(".mdb").forEach(function(b){b.className=(b.getAttribute("data-m")==="training"?"bp":"bs")+" flex-1 mdb";b.style.padding=".6rem";});
+    document.querySelectorAll(".tmb").forEach(function(b){b.className=(b.getAttribute("data-t")==="30"?"bp":"bs")+" flex-1 tmb";b.style.padding=".6rem";});
+    document.getElementById("tmCfg").style.display="none";
+    smo("cfgM");
+}
+ 
+document.addEventListener("click",function(e){
+    if(e.target.classList.contains("qcb")){CF.qc=parseInt(e.target.getAttribute("data-c"));document.querySelectorAll(".qcb").forEach(function(b){b.className=(b.getAttribute("data-c")===String(CF.qc)?"bp":"bs")+" flex-1 qcb";b.style.padding=".6rem";});}
+    if(e.target.classList.contains("mdb")){CF.md=e.target.getAttribute("data-m");document.querySelectorAll(".mdb").forEach(function(b){b.className=(b.getAttribute("data-m")===CF.md?"bp":"bs")+" flex-1 mdb";b.style.padding=".6rem";});document.getElementById("tmCfg").style.display=CF.md==="exam"?"block":"none";}
+    if(e.target.classList.contains("tmb")){CF.tp=parseInt(e.target.getAttribute("data-t"));document.querySelectorAll(".tmb").forEach(function(b){b.className=(b.getAttribute("data-t")===String(CF.tp)?"bp":"bs")+" flex-1 tmb";b.style.padding=".6rem";});}
+});
+ 
+/* ===== LANCEMENT QUIZ ===== */
+function lQuiz(){
+    hmo("cfgM");
+    var s=SUBS.find(function(x){return x.id===CF.sid;}),aqs=gQs(CF.sid);
+    if(aqs.length===0){toast("Aucune question pour ce niveau","warning");return;}
+    var qs=shuf(aqs.slice(0)).slice(0,Math.min(CF.qc,aqs.length));
+    var lv=LVS[li(S.lv)];
+    S.qs={sid:CF.sid,lv:S.lv,md:CF.md,qc:qs.length,tp:CF.tp,qs:qs,ci:0,sc:0,ans:[],st:Date.now(),ti:null,tl:CF.md==="exam"?CF.tp:0,qst:Date.now()};
+    var b=document.getElementById("qSubB");b.style.background=s.bg;b.style.color=s.cl;b.innerHTML='<i class="fas '+s.ic+'"></i> '+s.n;
+    document.getElementById("qModB").textContent=CF.md==="exam"?"Examen":"Entraînement";
+    document.getElementById("qLvB").innerHTML='<i class="fas fa-graduation-cap"></i> '+lv.n;
+    document.getElementById("tmC").style.display=CF.md==="exam"?"block":"none";
+    go("quiz");rQ();
+}
+ 
+function qQuick(){
+    var av=SUBS.filter(function(s){return isAvail(s.id)&&gQs(s.id).length>0;});
+    if(!av.length){toast("Aucune question pour ce niveau","warning");return;}
+    var rs=av[Math.floor(Math.random()*av.length)];
+    CF={sid:rs.id,qc:5,md:"training",tp:30};lQuiz();
+}
+ 
+/* ===== QUESTION ===== */
+function rQ(){
+    var q=S.qs;if(q.ci>=q.qs.length){eQ();return;}
+    var qu=q.qs[q.ci],L=["A","B","C","D"];
+    document.getElementById("qProg").textContent=(q.ci+1)+"/"+q.qc;
+    document.getElementById("qSc").textContent="Score: "+q.sc;
+    document.getElementById("qPB").style.width=((q.ci+1)/q.qc*100)+"%";
+    document.getElementById("qCat").textContent=qu.c+" — Niveau "+LVS[li(qu.lv)].n;
+    document.getElementById("qTx").textContent=qu.q;
+    document.getElementById("qOpts").innerHTML=qu.o.map(function(o,i){return '<div class="qo" data-i="'+i+'" onclick="selO('+i+')" tabindex="0" onkeydown="if(event.key===\'Enter\')selO('+i+')" role="button"><div class="lt">'+L[i]+'</div><span style="font-size:.95rem;line-height:1.5">'+o+'</span></div>';}).join("");
+    document.getElementById("expB").style.display="none";
+    document.getElementById("nxB").style.display="none";
+    q.qst=Date.now();
+    if(q.md==="exam"){q.tl=q.tp;uTmD();clearInterval(q.ti);q.ti=setInterval(function(){q.tl--;uTmD();if(q.tl<=0){clearInterval(q.ti);hAns(-1);}},1000);}
+}
+ 
+function uTmD(){
+    var q=S.qs,m=Math.floor(Math.max(0,q.tl)/60),s=Math.max(0,q.tl)%60;
+    document.getElementById("tmTx").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    var ci=document.getElementById("tmCi");ci.style.strokeDashoffset=188.5*(1-Math.max(0,q.tl)/q.tp);
+    var tc=document.getElementById("tmC");tc.className="tr";
+    if(q.tl<=5){tc.classList.add("d");ci.style.stroke="var(--danger)";}
+    else if(q.tl<=10){tc.classList.add("w");ci.style.stroke="var(--warning)";}
+    else ci.style.stroke="var(--accent)";
+}
+ 
+function selO(i){if(S.qs.ans.length>S.qs.ci)return;clearInterval(S.qs.ti);hAns(i);}
+ 
+function hAns(si){
+    var q=S.qs,qu=q.qs[q.ci],ts=Math.round((Date.now()-q.qst)/1000),ok=si===qu.a;
+    if(ok)q.sc++;
+    q.ans.push({s:si,c:qu.a,ok:ok,t:ts,lv:qu.lv});
+    document.querySelectorAll(".qo").forEach(function(o,i){o.onclick=null;o.style.cursor="default";if(i===qu.a)o.classList.add("ok");else if(i===si&&!ok)o.classList.add("no");});
+    if(q.md==="training"){document.getElementById("expB").style.display="block";document.getElementById("expTx").textContent=qu.e;}
+    var nb=document.getElementById("nxB");nb.style.display="inline-flex";
+    nb.innerHTML=q.ci<q.qc-1?'Suivant <i class="fas fa-arrow-right ml-2"></i>':'Voir les résultats <i class="fas fa-chart-bar ml-2"></i>';
+    if(ok)toast("Bonne réponse !","success");else if(si===-1)toast("Temps écoulé !","warning");else toast("Mauvaise réponse","error");
+}
+ 
+function nxtQ(){S.qs.ci++;rQ();}
+ 
+function hKb(e){
+    if(S.pg!=="quiz"||!S.qs)return;var q=S.qs;
+    if(q.ans.length>q.ci){if(e.key==="Enter")nxtQ();return;}
+    if(e.key==="1"||e.key==="a"||e.key==="A")selO(0);
+    else if(e.key==="2"||e.key==="b"||e.key==="B")selO(1);
+    else if(e.key==="3"||e.key==="c"||e.key==="C")selO(2);
+    else if(e.key==="4"||e.key==="d"||e.key==="D")selO(3);
+}
+ 
+/* ===== FIN QUIZ ===== */
+function eQ(){
+    clearInterval(S.qs.ti);var q=S.qs,tt=Math.round((Date.now()-q.st)/1000);
+    var at=q.ans.length>0?Math.round(q.ans.reduce(function(a,b){return a+b.t;},0)/q.ans.length):0;
+    var pct=Math.round(q.sc/q.qc*100);
+    var st=S.us;st.tq++;st.tc+=q.sc;st.tqn+=q.qc;st.tt+=tt;st.pt+=q.sc*10+(q.md==="exam"?20:0);
+    if(pct>=60){st.sk++;if(st.sk>st.bsk)st.bsk=st.sk;}else st.sk=0;
+    var td=new Date().toISOString().split("T")[0];
+    st.hi.unshift({sid:q.sid,lv:q.lv,sc:q.sc,tot:q.qc,md:q.md,dt:new Date().toISOString(),tm:tt,pct:pct});
+    if(st.hi.length>50)st.hi.pop();
+    if(!st.ss[q.sid])st.ss[q.sid]={tc:0,tqn:0,qz:0,lvls:{}};
+    if(!st.ss[q.sid].lvls[q.lv])st.ss[q.sid].lvls[q.lv]={tc:0,tqn:0,qz:0};
+    st.ss[q.sid].lvls[q.lv].tc+=q.sc;st.ss[q.sid].lvls[q.lv].tqn+=q.qc;st.ss[q.sid].lvls[q.lv].qz++;
+    st.ss[q.sid].tc+=q.sc;st.ss[q.sid].tqn+=q.qc;st.ss[q.sid].qz++;
+    st.ds[td]=(st.ds[td]||0)+q.sc;
+    svS();uSk();go("results");
+ 
+    var ic=document.getElementById("rIc"),ti=document.getElementById("rTi"),su=document.getElementById("rSu");
+    if(pct>=90){ic.style.background="rgba(0,230,118,.15)";ic.innerHTML='<i class="fas fa-trophy" style="color:var(--accent)"></i>';ti.textContent="Excellent !";su.textContent="Tu maîtrises parfaitement ce chapitre.";}
+    else if(pct>=70){ic.style.background="rgba(0,188,212,.15)";ic.innerHTML='<i class="fas fa-thumbs-up" style="color:var(--accent3)"></i>';ti.textContent="Bien joué !";su.textContent="De bonnes bases, continue comme ça.";}
+    else if(pct>=50){ic.style.background="rgba(255,193,7,.15)";ic.innerHTML='<i class="fas fa-hand" style="color:var(--warning)"></i>';ti.textContent="Pas mal";su.textContent="Quelques points a retravailler.";}
+    else{ic.style.background="rgba(255,71,87,.15)";ic.innerHTML='<i class="fas fa-book-open" style="color:var(--danger)"></i>';ti.textContent="A retravailler";su.textContent="Reprends le cours et réessaie.";}
+    document.getElementById("rPc").textContent=pct+"%";document.getElementById("rDt").textContent=q.sc+"/"+q.qc;
+    setTimeout(function(){var ci=document.getElementById("rCi");ci.style.transition="stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1)";ci.style.strokeDashoffset=490*(1-pct/100);ci.style.stroke=pct>=70?"var(--accent)":pct>=50?"var(--warning)":"var(--danger)";},100);
+    document.getElementById("rOk").textContent=q.sc;document.getElementById("rNo").textContent=q.qc-q.sc;document.getElementById("rTm").textContent=at+"s";
+    var L=["A","B","C","D"];
+    document.getElementById("rDet").innerHTML=q.qs.map(function(qu,i){var a=q.ans[i],lv=LVS[li(qu.lv)];return '<div class="cds" style="padding:1rem;border-left:3px solid '+(a.ok?"var(--success)":"var(--danger)")+'"><div class="flex items-start gap-3"><div style="width:28px;height:28px;border-radius:8px;background:'+(a.ok?"rgba(0,230,118,.12)":"rgba(255,71,87,.12)")+';display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px"><i class="fas '+(a.ok?"fa-check":"fa-xmark")+'" style="color:'+(a.ok?"var(--success)":"var(--danger)")+';font-size:.75rem"></i></div><div class="flex-1"><div class="flex items-center gap-2 mb-1"><span style="font-size:.65rem;padding:.1rem .4rem;border-radius:4px;background:rgba(0,188,212,.1);color:var(--accent3);font-weight:600">'+lv.n+'</span><span style="font-size:.65rem;padding:.1rem .4rem;border-radius:4px;background:rgba(255,255,255,.05);color:var(--fg-muted)">'+qu.c+'</span></div><p style="font-size:.9rem;margin-bottom:.4rem;line-height:1.5">'+qu.q+'</p><div style="font-size:.8rem;color:var(--fg-muted)">'+(!a.ok?'<span style="color:var(--danger)">Ta réponse : '+(a.s>=0?L[a.s]+". "+qu.o[a.s]:"Temps écoulé")+'</span><br>':'')+'<span style="color:var(--success)">Bonne réponse : '+L[qu.a]+". "+qu.o[qu.a]+'</span><span style="margin-left:.75rem">'+a.t+'s</span></div></div></div></div>';}).join("");
+    uRk();
+}
+ 
+function rQuiz(){if(S.qs)lQuiz();else go("subjects");}
+function qQuit(){if(S.qs)clearInterval(S.qs.ti);S.qs=null;hmo("quitM");go("subjects");}
+ 
+/* ===== DASHBOARD ===== */
+function uDash(){
+    var s=S.us;
+    document.getElementById("dQz").textContent=s.tq;
+    document.getElementById("dAv").textContent=s.tqn>0?Math.round(s.tc/s.tqn*100)+"%":"0%";
+    document.getElementById("dSk").textContent=s.sk;var tm=Math.round(s.tt/60);
+    document.getElementById("dTm").textContent=tm<60?tm+"min":Math.floor(tm/60)+"h"+(tm%60)+"min";
+    document.getElementById("sSc").innerHTML=SUBS.filter(function(x){return isAvail(x.id);}).map(function(x){var ss=s.ss[x.id]||{tc:0,tqn:0,qz:0,lvls:{}};var ls=ss.lvls?ss.lvls[S.lv]||{tc:0,tqn:0,qz:0}:{tc:ss.tc,tqn:ss.tqn,qz:ss.qz};var p=ls.tqn>0?Math.round(ls.tc/ls.tqn*100):0;return '<div class="flex items-center gap-3"><div style="width:32px;height:32px;border-radius:8px;background:'+x.bg+';display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas '+x.ic+'" style="color:'+x.cl+';font-size:.75rem"></i></div><div class="flex-1 min-w-0"><div class="flex items-center justify-between mb-1"><span style="font-size:.85rem;font-weight:600" class="truncate">'+x.n+'</span><span style="font-size:.8rem;font-weight:700;color:'+x.cl+';font-family:Space Grotesk">'+p+'%</span></div><div class="pb" style="height:6px"><div class="pf" style="width:'+p+'%;background:'+x.cl+'"></div></div></div></div>';}).join("");
+    var hc=document.getElementById("qHi");
+    if(s.hi.length===0){hc.innerHTML='<p style="color:var(--fg-muted);text-align:center;padding:2rem">Aucun quiz terminé.</p>';}
+    else{hc.innerHTML=s.hi.slice(0,15).map(function(h){var x=SUBS.find(function(z){return z.id===h.sid;});var lv=LVS[li(h.lv)];var d=new Date(h.dt).toLocaleDateString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});var pc=h.pct>=70?"var(--success)":h.pct>=50?"var(--warning)":"var(--danger)";return '<div class="flex items-center gap-3 p-3 border-b" style="border-color:var(--border)"><div style="width:36px;height:36px;border-radius:10px;background:'+x.bg+';display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas '+x.ic+'" style="color:'+x.cl+';font-size:.85rem"></i></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span style="font-weight:600;font-size:.9rem">'+x.n+'</span><span style="font-size:.7rem;padding:.15rem .5rem;border-radius:4px;background:rgba(0,188,212,.1);color:var(--accent3)">'+lv.n+'</span><span style="font-size:.7rem;padding:.15rem .5rem;border-radius:4px;background:rgba(255,255,255,.05);color:var(--fg-muted)">'+(h.md==="exam"?"Examen":"Entraînement")+'</span></div><span style="color:var(--fg-muted);font-size:.8rem">'+d+" — "+Math.round(h.tm/60)+'min</span></div><div style="text-align:right"><span style="font-weight:700;color:'+pc+';font-family:Space Grotesk">'+h.pct+'%</span><p style="color:var(--fg-muted);font-size:.75rem">'+h.sc+"/"+h.tot+"</p></div></div>";}).join("");}
+    dPC();
+}
+ 
+function dPC(){
+    var cv=document.getElementById("pCh");if(!cv)return;var ctx=cv.getContext("2d"),rc=cv.parentElement.getBoundingClientRect();
+    cv.width=rc.width*2;cv.height=400;cv.style.width=rc.width+"px";cv.style.height="200px";ctx.scale(2,2);
+    var w=rc.width,h=200;ctx.clearRect(0,0,w,h);
+    var days=[];for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().split("T")[0]);}
+    var lb=days.map(function(d){return new Date(d).toLocaleDateString("fr-FR",{weekday:"short"}).slice(0,2);});
+    var vals=days.map(function(d){return S.us.ds[d]||0;});var mx=Math.max.apply(null,vals.concat([1]));
+    ctx.strokeStyle="rgba(255,255,255,.05)";ctx.lineWidth=1;for(var i=0;i<=4;i++){var y=20+(h-50)*i/4;ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(w-10,y);ctx.stroke();}
+    ctx.fillStyle="rgba(255,255,255,.3)";ctx.font="10px Space Grotesk";ctx.textAlign="right";for(var i=0;i<=4;i++)ctx.fillText(Math.round(mx*(4-i)/4),35,20+(h-50)*i/4+3);
+    ctx.textAlign="center";var sx=(w-50)/6;days.forEach(function(_,i){ctx.fillText(lb[i],40+sx*i,h-5);});
+    if(vals.some(function(v){return v>0;})){var pts=vals.map(function(v,i){return{x:40+sx*i,y:20+(h-50)*(1-v/mx)};});ctx.beginPath();ctx.moveTo(pts[0].x,h-30);pts.forEach(function(p){ctx.lineTo(p.x,p.y);});ctx.lineTo(pts[pts.length-1].x,h-30);ctx.closePath();var g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,"rgba(0,230,118,0.2)");g.addColorStop(1,"rgba(0,230,118,0.0)");ctx.fillStyle=g;ctx.fill();ctx.beginPath();pts.forEach(function(p,i){if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});ctx.strokeStyle="#00e676";ctx.lineWidth=2.5;ctx.lineJoin="round";ctx.stroke();pts.forEach(function(p){ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle="#00e676";ctx.fill();ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fillStyle="#0a0f0d";ctx.fill();});}
+}
+ 
+/* ===== CLASSEMENT ===== */
+function rRk(){uRk();}
+function uRk(){var me=RKD.find(function(r){return r.me;});if(me){me.sc=S.us.pt;me.qz=S.us.tq;me.av2=S.us.tqn>0?Math.round(S.us.tc/S.us.tqn*100):0;}RKD.sort(function(a,b){return b.sc-a.sc;});var c=document.getElementById("rkL");var rc={1:"#FFD700",2:"#C0C0C0",3:"#CD7F32"};c.innerHTML=RKD.map(function(r,i){return '<div class="flex items-center gap-3 p-4 border-b" style="border-color:var(--border);'+(r.me?"background:rgba(0,230,118,.05);":"")+'"><span style="width:28px;text-align:center;font-family:Space Grotesk;font-weight:700;color:'+(rc[i+1]||"var(--fg-muted)")+';font-size:.9rem">'+(i+1)+'</span><div style="width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0"><img src="https://picsum.photos/seed/'+r.av+'/72/72" style="width:100%;height:100%;object-fit:cover"></div><div class="flex-1 min-w-0"><span style="font-weight:'+(r.me?"700":"600")+';font-size:.9rem">'+r.name+(r.me?" (toi)":"")+'</span><p style="color:var(--fg-muted);font-size:.75rem">'+r.qz+" quiz — "+r.av2+'% moy.</p></div><span style="font-family:Space Grotesk;font-weight:700;color:'+(r.me?"var(--accent)":"var(--fg)")+';font-size:.95rem">'+r.sc.toLocaleString()+" pts</span></div>";}).join("");}
+ 
+function uRecAct(){var c=document.getElementById("recAct"),h=S.us.hi;if(!h.length){c.innerHTML='<p style="color:var(--fg-muted);text-align:center;padding:2rem">Aucune activité.</p>';return;}c.innerHTML='<div class="flex flex-col gap-3">'+h.slice(0,5).map(function(x){var s=SUBS.find(function(z){return z.id===x.sid;}),lv=LVS[li(x.lv)],d=new Date(x.dt).toLocaleDateString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}),pc=x.pct>=70?"var(--success)":x.pct>=50?"var(--warning)":"var(--danger)";return '<div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg2)"><div style="width:36px;height:36px;border-radius:10px;background:'+s.bg+';display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas '+s.ic+'" style="color:'+s.cl+';font-size:.85rem"></i></div><div class="flex-1"><div class="flex items-center gap-2"><span style="font-weight:600;font-size:.9rem">'+s.n+'</span><span style="font-size:.65rem;padding:.1rem .4rem;border-radius:4px;background:rgba(0,188,212,.1);color:var(--accent3)">'+lv.n+'</span></div><p style="color:var(--fg-muted);font-size:.8rem">'+d+" — "+x.sc+"/"+x.tot+'</p></div><span style="font-weight:700;color:'+pc+';font-family:Space Grotesk">'+x.pct+'%</span></div>';}).join("")+"</div>";}
+function uSk(){document.getElementById("skC").textContent=S.us.sk;}
+function aniSn(){document.querySelectorAll(".sn[data-t]").forEach(function(el){var t=parseInt(el.getAttribute("data-t")),c=0,inc=Math.ceil(t/60),tm=setInterval(function(){c+=inc;if(c>=t){c=t;clearInterval(tm);}el.textContent=c.toLocaleString("fr-FR");},25);});}
+function shuf(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}return a;}
+function rstAll(){S.us={tq:0,tc:0,tqn:0,tt:0,sk:0,bsk:0,pt:0,hi:[],ss:{},ds:{}};svS();hmo("profM");uSk();uDash();uRecAct();toast("Données réinitialisées","info");}
+ 
+/* Fermer modals en cliquant dehors */
+document.querySelectorAll(".mo").forEach(function(o){o.addEventListener("click",function(e){if(e.target===this)hmo(this.id);});});
+ 
+init();
+</script>
+</body>
+</html>
